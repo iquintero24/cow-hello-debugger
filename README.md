@@ -1,12 +1,17 @@
 # 🐮 Cow Debugger — Learn and Visualize Cow Step by Step
 
+> ⚠️ **Note:** The current working version is in the [`feature/v1-ai-assisted`](https://github.com/iquintero24/cow-hello-debugger/tree/feature/v1-ai-assisted) branch.  
+> This `main` branch only contains the structure and plan for a future clean rewrite without AI assistance.
+
+---
+
 This project is a simple, interactive **debugger** written in Python for the esoteric language **Cow**.  
 It allows you to execute Cow code step by step, while visualizing:
 
-- 📦 The memory (cells)
-- 🎯 The pointer position
-- 📋 The clipboard (`MMM`)
-- 🖨️ The output generated
+- 📦 The memory (cells)  
+- 🎯 The pointer position  
+- 📋 The clipboard (`MMM`)  
+- 🖨️ The output generated  
 
 ---
 
@@ -18,25 +23,25 @@ It’s designed to help beginners understand Cow’s internals and how it operat
 ---
 
 ## 🧠 Perfect for:
-- Learning Cow from zero
-- Teaching esoteric programming
-- Understanding memory and instruction flow
+- Learning Cow from zero  
+- Teaching esoteric programming  
+- Understanding memory and instruction flow  
 
 ---
 
 ## 📁 Project contents
 
-- `hello_world.cow` → A basic Cow program that prints `"HELLO WORLD"`
-- `debugger_cow.py` → A TODO-based Python debugger you’re building step by step
-- `README.md` → Project documentation
+- `hello_world.cow` → A basic Cow program that prints `"HELLO WORLD"`  
+- `debugger_cow.py` → A TODO-based Python debugger you’re building step by step  
+- `README.md` → Project documentation  
 
 ---
 
 ## 🧩 Planned features:
-- Support for loops (`MOO ... moo`)
-- Code execution from memory (`mOO`)
-- GUI debugger (Tkinter or curses)
-- Reverse stepping (execution history)
+- Support for loops (`MOO ... moo`)  
+- Code execution from memory (`mOO`)  
+- GUI debugger (Tkinter or curses)  
+- Reverse stepping (execution history)  
 
 ---
 
