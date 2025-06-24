@@ -1,52 +1,128 @@
-"""
-🐄 COW DEBUGGER 🧠
+import re
 
-Este script es una guía paso a paso para crear tu propio debugger (depurador)
-para el lenguaje esotérico Cow, escrito en Python. Te permite ejecutar código
-Cow paso a paso, viendo cómo cambian la memoria, el puntero, el portapapeles,
-y la salida mientras se interpreta.
+# ✅ Valid Cow language instructions
+valid_commands = {
+    "moo", "mOo", "moO", "mOO", "Moo", "MOo", "MoO",
+    "MOO", "OOO", "MMM", "OOM", "oom"
+}
 
-Ideal para aprender cómo funciona Cow, practicar programación y enseñar a otros.
-Puedes usar este archivo como un TODO para marcar tu progreso mientras lo implementas.
-"""
+debug_mode = False  # 🔁 True: step-by-step | False: run all at once
 
-# ✅ 1. Cargar el código Cow desde un archivo o string
-# TODO: Abrir el archivo hello_world.cow y guardar el código
-# TODO: Separar el código por espacios y filtrar solo comandos válidos
+# ✅ Clean code: remove comments and invalid characters
+def clean_cow_code(content):
+    lines = content.splitlines()
+    cleaned_lines = []
 
-# ✅ 2. Inicializar las estructuras básicas
-# TODO: Crear lista de instrucciones válidas (MoO, Moo, etc)
-# TODO: Inicializar memoria con 100 celdas (puedes usar [0]*100)
-# TODO: Inicializar el puntero (pointer = 0)
-# TODO: Inicializar output (texto que se imprimirá)
-# TODO: Inicializar clipboard para MMM
+    for line in lines:
+        line = line.split(";")[0]  # remove everything after ;
+        line = re.sub(r"[^\w\s]", "", line)  # remove special symbols
+        cleaned_lines.append(line.strip())
 
-# ✅ 3. Ejecutar paso a paso con while loop
-# TODO: Crear un while que recorra las instrucciones (ip < len(instructions))
-# TODO: Leer la instrucción actual y procesarla con if/elif
+    return " ".join(cleaned_lines)
 
-# ✅ 4. Implementar comandos Cow básicos
-# TODO: "MoO" - sumar 1 a la celda actual
-# TODO: "MOo" - restar 1
-# TODO: "moO" - mover el puntero a la derecha
-# TODO: "mOo" - mover el puntero a la izquierda
-# TODO: "Moo" - si valor > 0 imprimirlo como ASCII, si es 0 pedir input
-# TODO: "MMM" - si clipboard vacío, copiar valor actual. Si no, pegar
-# TODO: "OOM" - mostrar número como salida (opcional)
+# ✅ Build jump map for loop handling (MOO ... moo)
+def build_jump_map(instructions):
+    stack = []
+    jump_map = {}
+    for i, instr in enumerate(instructions):
+        if instr == "MOO":
+            stack.append(i)
+        elif instr == "moo":
+            if not stack:
+                raise SyntaxError(f"Error: 'moo' without matching 'MOO' at instruction {i}")
+            start = stack.pop()
+            jump_map[start] = i
+            jump_map[i] = start
+    if stack:
+        raise SyntaxError("Error: unmatched 'MOO' found")
+    return jump_map
 
-# ✅ 5. Mostrar estado para debug paso a paso
-# TODO: Imprimir número de paso y comando actual
-# TODO: Mostrar puntero, memoria (primeros 10 slots), output, clipboard
-# TODO: Pausar con input() para avanzar paso a paso
+# ✅ Optional: Generate Cow code file from a string
+def generate_cow_file_from_text(text, filename):
+    instructions = []
+    for char in text:
+        instructions += ["MoO"] * ord(char)
+        instructions.append("Moo")
+    with open(filename, "w") as f:
+        f.write(" ".join(instructions))
+    print(f"✅ File '{filename}' generated for text: '{text}'")
 
-# ✅ 6. Extensiones futuras (cuando termines lo básico)
-# TODO: Soporte para bucles (MOO ... moo)
-# TODO: Soporte para mOO (ejecutar contenido como código Cow)
-# TODO: Interfaz visual (Tkinter / curses)
+# Uncomment to generate a file that prints "Hello World"
+# generate_cow_file_from_text("Hello World", "w.cow")
 
-# 🎯 BONUS: Guardar un historial de estados (para retroceder pasos)
-# TODO: Guardar memoria/puntero/output en cada paso en una lista
+try:
+    with open("jdoodle.cow", "r", encoding="utf-8") as file:
+        content = file.read()
+        cleaned_code = clean_cow_code(content)
+        words = cleaned_code.split()
+        instructions = [w for w in words if w in valid_commands]
 
-# ¡Comienza tu implementación debajo de esta línea 👇!
+        print(f"\n🎯 Valid instructions loaded ({len(instructions)}):")
+        print(instructions)
 
-# ... tu código aquí ...
+        memory = [0] * 100
+        pointer = 0
+        output = ""
+        clipboard = None
+        ip = 0  # instruction pointer
+
+        jumps = build_jump_map(instructions)
+
+        while ip < len(instructions):
+            instr = instructions[ip]
+
+            if debug_mode:
+                print(f"\n🔎 Step {ip+1} - Executing: {instr}")
+                print(f"📦 Memory: {memory[:10]}")
+                print(f"📍 Pointer: {pointer}, Current value: {memory[pointer]}")
+                print(f"🖨️ Current output: '{output}'")
+                print(f"📋 Clipboard: {clipboard}")
+                input("⏸️ Press ENTER to continue...")
+
+            jumped = False
+
+            if instr == "MoO":
+                memory[pointer] = (memory[pointer] + 1) % 256
+            elif instr == "MOo":
+                memory[pointer] = (memory[pointer] - 1) % 256
+            elif instr == "moO":
+                pointer = (pointer + 1) % len(memory)
+            elif instr == "mOo":
+                pointer = (pointer - 1) % len(memory)
+            elif instr == "Moo":
+                if memory[pointer] == 0:
+                    user_input = input("⌨️ Input required: ")
+                    if user_input:
+                        memory[pointer] = ord(user_input[0])
+                else:
+                    char = chr(memory[pointer])
+                    output += char
+                    if debug_mode:
+                        print(f"✅ Output updated: '{output}' (char: '{char}')")
+            elif instr == "MMM":
+                if clipboard is None:
+                    clipboard = memory[pointer]
+                else:
+                    memory[pointer] = clipboard
+                    clipboard = None
+            elif instr == "OOM":
+                print(f"🔢 Numeric value: {memory[pointer]}")
+            elif instr == "MOO":
+                if memory[pointer] == 0:
+                    ip = jumps[ip]
+                    jumped = True
+            elif instr == "moo":
+                if memory[pointer] != 0:
+                    ip = jumps[ip]
+                    jumped = True
+
+            if not jumped:
+                ip += 1
+
+        print("\n✅ EXECUTION COMPLETE")
+        print(f"🖨️ Final output: '{output}'")
+
+except FileNotFoundError:
+    print("❌ File not found: 'w.cow'")
+except Exception as e:
+    print(f"❌ An error occurred: {e}")
